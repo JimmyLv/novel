@@ -1,4 +1,4 @@
-import { BubbleMenu, BubbleMenuProps } from "@tiptap/react";
+import { BubbleMenu, BubbleMenuProps, isNodeSelection } from "@tiptap/react";
 import { FC, useState } from "react";
 import {
   BoldIcon,
@@ -57,12 +57,18 @@ export const EditorBubbleMenu: FC<EditorBubbleMenuProps> = (props) => {
 
   const bubbleMenuProps: EditorBubbleMenuProps = {
     ...props,
-    shouldShow: ({ editor }) => {
-      // don't show if image is selected
-      if (editor.isActive("image")) {
+    shouldShow: ({ state, editor }) => {
+      const { selection } = state;
+      const { empty } = selection;
+
+      // don't show bubble menu if:
+      // - the selected node is an image
+      // - the selection is empty
+      // - the selection is a node selection (for drag handles)
+      if (editor.isActive("image") || empty || isNodeSelection(selection)) {
         return false;
       }
-      return editor.view.state.selection.content().size > 0;
+      return true;
     },
     tippyOptions: {
       moveTransition: "transform 0.15s ease-out",
@@ -81,7 +87,7 @@ export const EditorBubbleMenu: FC<EditorBubbleMenuProps> = (props) => {
   return (
     <BubbleMenu
       {...bubbleMenuProps}
-      className="flex w-fit divide-x divide-stone-200 rounded border border-stone-200 bg-white shadow-xl"
+      className="novel-flex novel-w-fit novel-divide-x novel-divide-stone-200 novel-rounded novel-border novel-border-stone-200 novel-bg-white novel-shadow-xl"
     >
       <NodeSelector
         editor={props.editor}
@@ -101,17 +107,17 @@ export const EditorBubbleMenu: FC<EditorBubbleMenuProps> = (props) => {
           setIsNodeSelectorOpen(false);
         }}
       />
-      <div className="flex">
+      <div className="novel-flex">
         {items.map((item, index) => (
           <button
             key={index}
             onClick={item.command}
-            className="p-2 text-stone-600 hover:bg-stone-100 active:bg-stone-200"
+            className="novel-p-2 novel-text-stone-600 hover:novel-bg-stone-100 active:novel-bg-stone-200"
             type="button"
           >
             <item.icon
-              className={cn("h-4 w-4", {
-                "text-blue-500": item.isActive(),
+              className={cn("novel-h-4 novel-w-4", {
+                "novel-text-blue-500": item.isActive(),
               })}
             />
           </button>

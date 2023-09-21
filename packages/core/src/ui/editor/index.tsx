@@ -19,34 +19,75 @@ import { EditorBubbleMenu } from "./bubble-menu";
 import { getPrevText } from "@/lib/editor";
 import { ImageResizer } from "./extensions/image-resizer";
 import { EditorProps } from "@tiptap/pm/view";
+import { Editor as EditorClass } from "@tiptap/core";
 
 export default function Editor({
   completionApi = "/api/generate",
+  className = "novel-relative novel-min-h-[500px] novel-w-full novel-max-w-screen-lg novel-border-stone-200 novel-bg-white sm:novel-mb-[calc(20vh)] sm:novel-rounded-lg sm:novel-border sm:novel-shadow-lg",
   defaultValue = defaultEditorContent,
   extensions = [],
   editorProps = {},
   onUpdate = () => {},
   onDebouncedUpdate = () => {},
   debounceDuration = 750,
+  storageKey = "novel__content",
 }: {
+  /**
+   * The API route to use for the OpenAI completion API.
+   * Defaults to "/api/generate".
+   */
   completionApi?: string;
-  defaultValue?: JSONContent;
+  /**
+   * Additional classes to add to the editor container.
+   * Defaults to "relative min-h-[500px] w-full max-w-screen-lg border-stone-200 bg-white sm:mb-[calc(20vh)] sm:rounded-lg sm:border sm:shadow-lg".
+   */
+  className?: string;
+  /**
+   * The default value to use for the editor.
+   * Defaults to defaultEditorContent.
+   */
+  defaultValue?: JSONContent | string;
+  /**
+   * A list of extensions to use for the editor, in addition to the default Novel extensions.
+   * Defaults to [].
+   */
   extensions?: Extension[];
+  /**
+   * Props to pass to the underlying Tiptap editor, in addition to the default Novel editor props.
+   * Defaults to {}.
+   */
   editorProps?: EditorProps;
+  /**
+   * A callback function that is called whenever the editor is updated.
+   * Defaults to () => {}.
+   */
   // eslint-disable-next-line no-unused-vars
-  onUpdate?: (content: JSONContent) => void;
+  onUpdate?: (editor?: EditorClass) => void | Promise<void>;
+  /**
+   * A callback function that is called whenever the editor is updated, but only after the defined debounce duration.
+   * Defaults to () => {}.
+   */
   // eslint-disable-next-line no-unused-vars
-  onDebouncedUpdate?: (content: JSONContent) => void;
+  onDebouncedUpdate?: (editor?: EditorClass) => void | Promise<void>;
+  /**
+   * The duration (in milliseconds) to debounce the onDebouncedUpdate callback.
+   * Defaults to 750.
+   */
   debounceDuration?: number;
+  /**
+   * The key to use for storing the editor's value in local storage.
+   * Defaults to "novel__content".
+   */
+  storageKey?: string;
 }) {
-  const [content, setContent] = useLocalStorage("novel__content", defaultValue);
+  const [content, setContent] = useLocalStorage(storageKey, defaultValue);
 
   const [hydrated, setHydrated] = useState(false);
 
   const debouncedUpdates = useDebouncedCallback(async ({ editor }) => {
     const json = editor.getJSON();
     setContent(json);
-    onDebouncedUpdate(json);
+    onDebouncedUpdate(editor);
   }, debounceDuration);
 
   const editor = useEditor({
@@ -73,7 +114,7 @@ export default function Editor({
         // complete(e.editor.storage.markdown.getMarkdown());
         va.track("Autocomplete Shortcut Used");
       } else {
-        onUpdate(e.editor.getJSON());
+        onUpdate(e.editor);
         debouncedUpdates(e);
       }
     },
@@ -155,7 +196,7 @@ export default function Editor({
       onClick={() => {
         editor?.chain().focus().run();
       }}
-      className="relative min-h-[500px] w-full max-w-screen-lg border-stone-200 bg-white p-12 px-8 sm:mb-[calc(20vh)] sm:rounded-lg sm:border sm:px-12 sm:shadow-lg"
+      className={className}
     >
       {editor && <EditorBubbleMenu editor={editor} />}
       {editor?.isActive("image") && <ImageResizer editor={editor} />}
