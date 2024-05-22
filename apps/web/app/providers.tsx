@@ -3,7 +3,7 @@
 import { Dispatch, ReactNode, SetStateAction, createContext } from "react";
 import { ThemeProvider, useTheme } from "next-themes";
 import { Toaster } from "sonner";
-import { Analytics } from "@vercel/analytics/react";
+// import { Analytics } from "@vercel/analytics/react";
 import useLocalStorage from "@/lib/hooks/use-local-storage";
 
 export const AppContext = createContext<{
@@ -40,7 +40,7 @@ export default function Providers({ children }: { children: ReactNode }) {
       >
         <ToasterProvider />
         {children}
-        <Analytics />
+        {/*<Analytics />*/}
       </AppContext.Provider>
     </ThemeProvider>
   );

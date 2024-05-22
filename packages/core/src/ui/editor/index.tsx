@@ -8,7 +8,7 @@ import useLocalStorage from "@/lib/hooks/use-local-storage";
 import { useDebouncedCallback } from "use-debounce";
 import { useCompletion } from "ai/react";
 import { toast } from "sonner";
-import va from "@vercel/analytics";
+// import va from "@vercel/analytics";
 import { defaultEditorContent } from "./default-content";
 import { EditorBubbleMenu } from "./bubble-menu";
 import { getPrevText } from "@/lib/editor";
@@ -117,7 +117,7 @@ export default function Editor({
           })
         );
         // complete(e.editor.storage.markdown.getMarkdown());
-        va.track("Autocomplete Shortcut Used");
+        // va.track("Autocomplete Shortcut Used");
       } else {
         onUpdate(e.editor);
         debouncedUpdates(e);
@@ -138,7 +138,7 @@ export default function Editor({
     onError: (err) => {
       toast.error(err.message);
       if (err.message === "You have reached your request limit for the day.") {
-        va.track("Rate Limit Reached");
+        // va.track("Rate Limit Reached");
       }
     },
   });
